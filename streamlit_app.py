@@ -8,13 +8,20 @@ st.set_page_config(page_title="La Papaya - Business, Financial & AI Dashboard", 
 st.title("🍊 La Papaya - Dashboard Integrado de Negocio, Finanzas e IA")
 st.markdown("### Control de Unit Economics, Estructura Financiera (Burn Rate/Ingresos), Métricas de IA y Sostenibilidad Social")
 
+# Tasa de cambio de referencia (COP a USD)
+TRM = 4000.0
+
 # ==========================================
 # BARRA LATERAL: Control de Variables Dinámicas
 # ==========================================
 st.sidebar.header("🎛️ Simulador de Negocio")
 usuarios_activos = st.sidebar.number_input("Usuarios Activos", value=684, step=10)
-mensualidad_senior = st.sidebar.slider("Mensualidad Eco Senior ($)", min_value=5000000, max_value=25000000, value=15000000, step=1000000)
-costo_senior = st.sidebar.slider("Costo de Operación Senior ($)", min_value=5000000, max_value=20000000, value=12000000, step=1000000)
+
+# Mensualidad Senior: Antes COP 15,000,000 (~$3,750 USD). Rango anterior: 5M a 25M COP (~1,250 a 6,250 USD)
+mensualidad_senior = st.sidebar.slider("Mensualidad Eco Senior (USD)", min_value=1250, max_value=6250, value=3750, step=250)
+
+# Costo Senior: Antes COP 12,000,000 (~$3,000 USD). Rango anterior: 5M a 20M COP (~1,250 a 5,000 USD)
+costo_senior = st.sidebar.slider("Costo de Operación Senior (USD)", min_value=1250, max_value=5000, value=3000, step=250)
 
 st.sidebar.markdown("---")
 st.sidebar.header("🤖 Configuración del Agente IA (Sylver)")
@@ -30,7 +37,7 @@ growth_rate = st.sidebar.slider("Tasa de Crecimiento Semanal Real (%)", min_valu
 # CÁLCULOS DINÁMICOS
 # ==========================================
 margen_senior = mensualidad_senior - costo_senior
-costo_joven = 800000  # Costo mes plan padrino para jóvenes
+costo_joven = 800000 / TRM  # COP 800,000 -> $200 USD (Costo mes plan padrino para jóvenes)
 ratio_subsidio_cruzado = margen_senior / costo_joven
 total_consultas_mes = usuarios_activos * 120  # Promedio de 120 interacciones mensuales por usuario
 costo_ia_mensual_usd = total_consultas_mes * cost_per_inference
@@ -44,7 +51,7 @@ with col1:
 with col2:
     st.metric("Subsidio Cruzado (RSC)", f"{ratio_subsidio_cruzado:.2f}x")
 with col3:
-    st.metric("Margen por Senior", f"${margen_senior:,.0f} COP")
+    st.metric("Margen por Senior", f"${margen_senior:,.2f} USD")
 with col4:
     st.metric("Precisión Agente IA", f"{accuracy}%")
 with col5:
@@ -65,7 +72,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # PESTAÑA 1: UNIT ECONOMICS COMPLETOS
 with tab1:
-    st.subheader("Métricas de Sostenibilidad Social y Margen")
+    st.subheader("Métricas de Sostenibilidad Social y Margen (USD)")
     data_ue = {
         "Métrica de Unit Economics": [
             "Mensualidad Eco Senior",
@@ -92,26 +99,26 @@ with tab1:
             "Retention Rate: Tasa de retención global"
         ],
         "Valor": [
-            f"${mensualidad_senior:,.0f} COP",
-            f"${costo_senior:,.0f} COP",
-            f"${margen_senior:,.0f} COP",
-            f"${costo_joven:,.0f} COP",
+            f"${mensualidad_senior:,.2f} USD",
+            f"${costo_senior:,.2f} USD",
+            f"${margen_senior:,.2f} USD",
+            f"${costo_joven:,.2f} USD",
             f"{ratio_subsidio_cruzado:.2f}x",
             f"{usuarios_activos:,}",
-            "$14,181.00 COP",
+            f"${14181.00 / TRM:,.2f} USD",  # COP 14,181.00 -> ~$3.55 USD
             "2 contratados",
             "0.44% mensual",
             "1.17% mensual",
-            "$159,040.00 COP",
-            "$1,000,000.00 COP",
-            "$12,000,000.00 COP",
-            "$1,800,000,000.00 COP",
+            f"${159040.00 / TRM:,.2f} USD", # COP 159,040 -> ~$39.76 USD
+            f"${1000000.00 / TRM:,.2f} USD", # COP 1,000,000 -> $250 USD
+            f"${12000000.00 / TRM:,.2f} USD", # COP 12,000,000 -> $3,000 USD
+            f"${1800000000.00 / TRM:,.2f} USD", # COP 1.8B -> $450,000 USD
             "75.0x",
             "1800.0x",
             "98.27%",
-            "$11,006,666.67 COP",
-            "$6,766,666.67 COP",
-            "$81,200,000.00 COP",
+            f"${11006666.67 / TRM:,.2f} USD", # COP 11.0M -> ~$2,751.67 USD
+            f"${6766666.67 / TRM:,.2f} USD", # COP 6.7M -> ~$1,691.67 USD
+            f"${81200000.00 / TRM:,.2f} USD", # COP 81.2M -> $20,300 USD
             f"{usuarios_activos:,}",
             "100.0%"
         ],
@@ -144,44 +151,62 @@ with tab1:
 
 # PESTAÑA 2: BURN RATE & CASHFLOW
 with tab2:
-    st.subheader("Estructura de Consumo de Caja (Burn Rate)")
+    st.subheader("Estructura de Consumo de Caja (Burn Rate en USD)")
     col_burn_act, col_burn_proj = st.columns(2)
     
     with col_burn_act:
-        st.markdown("### 🔥 Gross Burn Rate Actual")
+        st.markdown("### 🔥 Gross Burn Rate Actual (USD)")
         data_actual = {
             "Concepto": ["Hosting", "Dominio", "Desayunos (Mensual)", "Desayunos Anualizados", "Costos Variables", "Total / Mes"],
-            "Valor": ["$90,000.00 COP / Año", "$70,000.00 COP / Año", "$30,000.00 COP", "$360,000.00 COP", "$150,000.00 COP", "$193,333.33 COP"]
+            "Valor": [
+                f"${90000.00 / TRM:,.2f} USD / Año",  # ~$22.50
+                f"${70000.00 / TRM:,.2f} USD / Año",  # ~$17.50
+                f"${30000.00 / TRM:,.2f} USD",        # ~$7.50
+                f"${360000.00 / TRM:,.2f} USD",       # ~$90.00
+                f"${150000.00 / TRM:,.2f} USD",       # ~$37.50
+                f"${193333.33 / TRM:,.2f} USD"        # ~$48.33
+            ]
         }
         st.table(pd.DataFrame(data_actual))
-        st.info("**Cashflow Operativo:** $11,006,666.67 COP mensual")
+        st.info(f"**Cashflow Operativo:** ${11006666.67 / TRM:,.2f} USD mensual")
 
     with col_burn_proj:
-        st.markdown("### 🚀 Gross Burn Rate Proyectado")
+        st.markdown("### 🚀 Gross Burn Rate Proyectado (USD)")
         data_proyectado = {
             "Concepto": [
                 "Hosting/Año Proyectado", "Dominio/Año Proyectado", "Desayunos/Mes Proyectado", 
                 "Costos Variables Proyectados", "Salario Felipe", "Salario Yoiner", "Salario Jose Berna", "Total Proyectado / Mes"
             ],
             "Valor": [
-                "$7,500.00 COP", "$5,833.33 COP", "$30,000.00 COP", 
-                "$150,000.00 COP", "$6,000,000.00 COP", "$2,000,000.00 COP", "$4,000,000.00 COP", "$12,193,333.33 COP"
+                f"${7500.00 / TRM:,.2f} USD",        # ~$1.88
+                f"${5833.33 / TRM:,.2f} USD",        # ~$1.46
+                f"${30000.00 / TRM:,.2f} USD",       # ~$7.50
+                f"${150000.00 / TRM:,.2f} USD",      # ~$37.50
+                f"${6000000.00 / TRM:,.2f} USD",    # $1,500.00
+                f"${2000000.00 / TRM:,.2f} USD",    # $500.00
+                f"${4000000.00 / TRM:,.2f} USD",    # $1,000.00
+                f"${12193333.33 / TRM:,.2f} USD"    # ~$3,048.33
             ]
         }
         st.table(pd.DataFrame(data_proyectado))
 
 # PESTAÑA 3: INGRESOS OPERATIVOS
 with tab3:
-    st.subheader("Ingresos Operativos & Convenios")
+    st.subheader("Ingresos Operativos & Convenios (USD)")
+    
+    # Conversión de montos de ingresos de COP a USD
+    montos_cop = [
+        6000000, 70000000, 700000, 1500000, 3000000, 
+        4000000, 81200000, 11200000, 4081200000
+    ]
+    montos_usd = [m / TRM for m in montos_cop]
+    
     data_ingresos = {
         "Fuente de Ingreso": [
             "Grupo Textil", "Calima", "Javeriana", "Icesi", "Comfandi", 
             "Donación Internacional", "Total Sin Donación", "Total Sin Calima", "Total General Consolidado"
         ],
-        "Monto ($)": [
-            6000000, 70000000, 700000, 1500000, 3000000, 
-            4000000, 81200000, 11200000, 4081200000
-        ],
+        "Monto ($ USD)": montos_usd,
         "Tipo": [
             "Operativo", "Convenio", "Educativo", "Educativo", "Alianza", 
             "Filantropía", "Filtro Clave", "Filtro Clave", "Acumulado Consolidado"
@@ -192,11 +217,14 @@ with tab3:
     col_t1, col_t2 = st.columns([2, 3])
     with col_t1:
         st.markdown("#### Detalle Financiero de Canales")
-        st.table(df_ingresos)
+        # Formatear la tabla de salida para que muestre decimales limpios
+        df_display = df_ingresos.copy()
+        df_display["Monto ($ USD)"] = df_display["Monto ($ USD)"].map(lambda x: f"${x:,.2f}")
+        st.table(df_display)
     with col_t2:
-        st.markdown("#### Participación por Fuente de Ingresos")
+        st.markdown("#### Participación por Fuente de Ingresos (USD)")
         df_chart = df_ingresos[~df_ingresos["Fuente de Ingreso"].str.contains("Total")]
-        st.bar_chart(data=df_chart, x="Fuente de Ingreso", y="Monto ($)")
+        st.bar_chart(data=df_chart, x="Fuente de Ingreso", y="Monto ($ USD)")
 
 # PESTAÑA 4: RENDIMIENTO DETALLADO IA
 with tab4:
@@ -218,8 +246,8 @@ with tab4:
     with col_ia_d3:
         st.markdown("#### 💸 Métricas de Costo y Consumo")
         st.metric("Costo Promedio / Sesión", f"${cost_per_inference * 5:.3f} USD")
-        st.metric("Costo Mensual Consolidado (COP)", f"${costo_ia_mensual_usd * 4000:,.0f} COP")
-        st.caption("Calculado a una TRM estimada de $4,000 COP por USD.")
+        st.metric("Costo Mensual Consolidado (USD)", f"${costo_ia_mensual_usd:,.2f} USD")
+        st.caption("Cálculo directo basado en USD reales de infraestructura.")
 
 # PESTAÑA 5: CRECIMIENTO SEMANAL Y PIVOT ASSESSMENT
 with tab5:
