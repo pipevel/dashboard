@@ -3,7 +3,11 @@ import pandas as pd
 import numpy as np
 
 # Configuración de la página
-st.set_page_config(page_title="La Papaya - Business, Financial & AI Dashboard", page_icon="🍊", layout="wide")
+st.set_page_config(
+    page_title="La Papaya - Business, Financial & AI Dashboard", 
+    page_icon="🍊", 
+    layout="wide"
+)
 
 st.title("🍊 La Papaya - Dashboard Integrado de Negocio, Finanzas e IA")
 st.markdown("### Control de Unit Economics, Estructura Financiera (Burn Rate/Ingresos), Métricas de IA y Sostenibilidad Social")
@@ -15,13 +19,16 @@ TRM = 4000.0
 # BARRA LATERAL: Control de Variables Dinámicas
 # ==========================================
 st.sidebar.header("🎛️ Simulador de Negocio")
-usuarios_activos = st.sidebar.number_input("Usuarios Activos", value=684, step=10)
+usuarios_activos = st.sidebar.number_input("Usuarios Activos (Seniors)", value=684, step=10)
 
-# Mensualidad Senior: Antes COP 15,000,000 (~$3,750 USD). Rango anterior: 5M a 25M COP (~1,250 a 6,250 USD)
-mensualidad_senior = st.sidebar.slider("Mensualidad Eco Senior (USD)", min_value=1250, max_value=6250, value=3750, step=250)
+# Licencias y Suscripciones (Nuevas variables)
+precio_b2b_empresa = st.sidebar.number_input("Licencia B2B SaaS Empresas (USD)", value=100, step=10)
+mensualidad_senior = st.sidebar.slider("Suscripción Mensual Senior (USD)", min_value=10, max_value=500, value=50, step=5)
+suscripcion_jovenes = 0.0  # Entran GRATIS gracias a la IA automatizada
 
-# Costo Senior: Antes COP 12,000,000 (~$3,000 USD). Rango anterior: 5M a 20M COP (~1,250 a 5,000 USD)
-costo_senior = st.sidebar.slider("Costo de Operación Senior (USD)", min_value=1250, max_value=5000, value=3000, step=250)
+# Costos Operativos y de Adquisición
+costo_senior = st.sidebar.slider("Costo de Operación Senior (USD)", min_value=10, max_value=300, value=30, step=5)
+cac_senior = st.sidebar.number_input("Costo de Adquisición CAC Senior (USD)", value=1000, step=50)
 
 st.sidebar.markdown("---")
 st.sidebar.header("🤖 Configuración del Agente IA (Sylver)")
@@ -37,21 +44,27 @@ growth_rate = st.sidebar.slider("Tasa de Crecimiento Semanal Real (%)", min_valu
 # CÁLCULOS DINÁMICOS
 # ==========================================
 margen_senior = mensualidad_senior - costo_senior
-costo_joven = 800000 / TRM  # COP 800,000 -> $200 USD (Costo mes plan padrino para jóvenes)
-ratio_subsidio_cruzado = margen_senior / costo_joven
+costo_joven = 0.0  # Costo cubierto automáticamente por IA
+ratio_subsidio_cruzado = 3.5  # Promedio: 1 senior apadrina entre 3 y 4 jóvenes
+total_jovenes_impactados = int(usuarios_activos * ratio_subsidio_cruzado)
+
 total_consultas_mes = usuarios_activos * 120  # Promedio de 120 interacciones mensuales por usuario
 costo_ia_mensual_usd = total_consultas_mes * cost_per_inference
+
+# Cálculo de ratios de valor de vida del cliente (LTV / CAC)
+ltv_senior = cac_senior * 3.0  # Ratio 3:1
+ltv_empresa = 400.0  # Ratio 4:1 con respecto a la licencia B2B de $100
 
 # ==========================================
 # KPIs PRINCIPALES (Métricas Estrella)
 # ==========================================
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
-    st.metric("Usuarios Activos", f"{usuarios_activos:,}")
+    st.metric("Seniors Activos", f"{usuarios_activos:,}")
 with col2:
-    st.metric("Subsidio Cruzado (RSC)", f"{ratio_subsidio_cruzado:.2f}x")
+    st.metric("Jóvenes Apadrinados", f"{total_jovenes_impactados:,}")
 with col3:
-    st.metric("Margen por Senior", f"${margen_senior:,.2f} USD")
+    st.metric("Suscripción Senior", f"${mensualidad_senior:,.2f} USD")
 with col4:
     st.metric("Precisión Agente IA", f"{accuracy}%")
 with col5:
@@ -60,97 +73,145 @@ with col5:
 st.markdown("---")
 
 # ==========================================
-# PESTAÑAS DEL DASHBOARD (Toda la información)
+# PESTAÑAS DEL DASHBOARD
 # ==========================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Unit Economics Completos", 
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "📊 Unit Economics", 
+    "💚 Impacto Social y Ambiental",
+    "🌍 TAM / SAM / SOM",
     "🔥 Burn Rate & Flujo de Caja", 
-    "💰 Ingresos Operativos", 
     "🤖 Rendimiento Detallado IA", 
-    "📈 Crecimiento Semanal & Pivot Assessment"
+    "📈 Crecimiento & Pivot Assessment"
 ])
 
 # PESTAÑA 1: UNIT ECONOMICS COMPLETOS
 with tab1:
-    st.subheader("Métricas de Sostenibilidad Social y Margen (USD)")
+    st.subheader("Unit Economics & Oferta de Valor (USD)")
+    
     data_ue = {
-        "Métrica de Unit Economics": [
-            "Mensualidad Eco Senior",
-            "Costos Mes Eco Senior",
-            "Margen Bruto Eco Senior (Margen directo)",
-            "Costo Mes Plan Padrino (Jóvenes)",
-            "Ratio de Subsidio Cruzado (RSC)",
-            "Active Users: Usuarios activos",
-            "Average Revenue Per User (ARPU)",
-            "Bookings: Reservas / Facturación contratada",
-            "Churn Rate Adultos Mayores",
-            "Churn Rate Jóvenes",
-            "Customer Acquisition Cost (CAC) Jóvenes",
-            "Customer Acquisition Cost (CAC) Senior",
-            "Customer Lifetime Value (LTV) Joven",
-            "Customer Lifetime Value (LTV) Senior (10 años)",
-            "LTV / CAC Jóvenes",
-            "LTV / CAC Adultos Mayores",
-            "Gross Margin (Margen Bruto %)",
-            "Gross Profit: Ganancia bruta mensual",
-            "MRR (Mensual recurrente base)",
-            "ARR (Anualizado proyectado)",
-            "Registered Users: Usuarios registrados",
-            "Retention Rate: Tasa de retención global"
+        "Concepto / Métrica": [
+            "B2B Empresas (Licencia SaaS ESG / Impacto)",
+            "Suscripción Mensual Senior",
+            "Suscripción Mensual Jóvenes",
+            "Costo de Adquisición (CAC) Seniors",
+            "Ratio LTV / CAC Seniors",
+            "Ratio LTV / CAC Empresas",
+            "Customer Lifetime Value (LTV) Senior Proyectado",
+            "Margen Bruto por Senior",
+            "Costos Operativos por Senior",
+            "Subsidio Cruzado Intergeneracional"
         ],
-        "Valor": [
+        "Valor Configurado": [
+            f"${precio_b2b_empresa:,.2f} USD",
             f"${mensualidad_senior:,.2f} USD",
-            f"${costo_senior:,.2f} USD",
+            "GRATIS (Automatizado con IA)",
+            f"${cac_senior:,.2f} USD",
+            "3:1",
+            "4:1",
+            f"${ltv_senior:,.2f} USD",
             f"${margen_senior:,.2f} USD",
-            f"${costo_joven:,.2f} USD",
-            f"{ratio_subsidio_cruzado:.2f}x",
-            f"{usuarios_activos:,}",
-            f"${14181.00 / TRM:,.2f} USD",  # COP 14,181.00 -> ~$3.55 USD
-            "2 contratados",
-            "0.44% mensual",
-            "1.17% mensual",
-            f"${159040.00 / TRM:,.2f} USD", # COP 159,040 -> ~$39.76 USD
-            f"${1000000.00 / TRM:,.2f} USD", # COP 1,000,000 -> $250 USD
-            f"${12000000.00 / TRM:,.2f} USD", # COP 12,000,000 -> $3,000 USD
-            f"${1800000000.00 / TRM:,.2f} USD", # COP 1.8B -> $450,000 USD
-            "75.0x",
-            "1800.0x",
-            "98.27%",
-            f"${11006666.67 / TRM:,.2f} USD", # COP 11.0M -> ~$2,751.67 USD
-            f"${6766666.67 / TRM:,.2f} USD", # COP 6.7M -> ~$1,691.67 USD
-            f"${81200000.00 / TRM:,.2f} USD", # COP 81.2M -> $20,300 USD
-            f"{usuarios_activos:,}",
-            "100.0%"
+            f"${costo_senior:,.2f} USD",
+            "1 Senior financia a 3–4 Jóvenes"
         ],
-        "Descripción / Enfoque Estratégico": [
-            "Cobro mensual por el programa completo de adultos mayores.",
-            "Costo de operación/servicios directos por adulto mayor.",
-            "Margen de contribución para subsidiar la operación social.",
-            "Monto subsidiado/costo del plan padrino para jóvenes.",
-            "Cuántos jóvenes cubre el margen neto que deja un solo Senior.",
-            "Total de usuarios activos en la plataforma/servicios.",
-            "Ingreso promedio mensual por usuario activo.",
-            "Contratos o reservas corporativas grandes aseguradas.",
-            "Tasa de cancelación / Abandono mensual de clientes senior.",
-            "Tasa de cancelación / Abandono mensual de usuarios jóvenes.",
-            "Costo de adquisición promedio por cada joven.",
-            "Costo de adquisición promedio por cada senior.",
-            "Valor de vida financiero del cliente joven.",
-            "LTV proyectado del adulto mayor a largo plazo (fidelidad extrema).",
-            "Relación de rentabilidad para el segmento joven (75 a 1).",
-            "Relación de rentabilidad para el segmento mayor (1800 a 1).",
-            "Margen bruto de ganancia porcentual global consolidado.",
-            "Ganancia bruta operativa mensual total.",
-            "Ingreso mensual recurrente base de operaciones.",
-            "Ingreso anualizado proyectado actual.",
-            "Total de personas registradas históricamente.",
-            "Porcentaje de clientes retenidos en el periodo."
+        "Detalle & Enfoque Estratégico": [
+            "SaaS para metas ESG con certificados de impacto auditables por IA.",
+            "Cobro mensual recurrente a usuarios mayores por programa integral.",
+            "Acceso libre apalancado en infraestructura IA de costo marginal nulo.",
+            "Inversión requerida para atraer y convertir a un usuario Senior.",
+            "Retorno de inversión sólido en el ciclo de vida del usuario mayor.",
+            "Relación de rentabilidad esperada sobre clientes corporativos B2B.",
+            "Valor total generado por cliente Senior a lo largo de su retención.",
+            "Contribución directa tras deducir costos de atención directa.",
+            "Gasto directo de mantenimiento operativo por usuario Senior.",
+            "Sostenibilidad social apalancada en mutualismo intergeneracional."
         ]
     }
     st.table(pd.DataFrame(data_ue))
 
-# PESTAÑA 2: BURN RATE & CASHFLOW
+# PESTAÑA 2: IMPACTO SOCIAL Y AMBIENTAL
 with tab2:
+    st.subheader("❤️ Mutualismo Intergeneracional e Impacto Social/Ambiental")
+    st.markdown("Cada **Residente / Senior** financia el proyecto de vida de jóvenes rurales a través del modelo de apoyo mutuo.")
+
+    col_imp1, col_imp2 = st.columns(2)
+    
+    with col_imp1:
+        st.markdown("### 👨‍🎓 Impacto Social y Humano")
+        data_social = {
+            "Indicador de Impacto": [
+                "Planes Padrino Financiados",
+                "Alimentación y Alojamiento Garantizado",
+                "Relaciones Intergeneracionales Creadas",
+                "Propósito y Bienestar Generado"
+            ],
+            "Impacto Directo (por Residente)": [
+                "3–4 jóvenes rurales por Senior",
+                "Hasta 4 jóvenes beneficiados",
+                "1 mentor Senior por cada 3–4 jóvenes",
+                "1 adulto mayor en envejecimiento activo"
+            ],
+            "Total Consolidado (Comunidad Actual)": [
+                f"{usuarios_activos * 3:,} a {usuarios_activos * 4:,} jóvenes",
+                f"Hasta {usuarios_activos * 4:,} jóvenes",
+                f"{usuarios_activos:,} mentores activos",
+                f"{usuarios_activos:,} adultos mayores activos"
+            ]
+        }
+        st.table(pd.DataFrame(data_social))
+
+    with col_imp2:
+        st.markdown("### 🌱 Impacto Ambiental y Sostenibilidad")
+        
+        # Cálculos proporcionales considerando 10 residentes como base de referencia
+        factor_10 = usuarios_activos / 10.0
+        
+        data_ambiental = {
+            "Métrica Ambiental": [
+                "Conservación de Bosque",
+                "Captura de Carbono Estimada",
+                "Compostaje de Residuos Orgánicos"
+            ],
+            "Impacto por Base (10 Residentes)": [
+                "5 hectáreas de bosque",
+                "10 tCO₂ / año",
+                "0.4 toneladas / mes"
+            ],
+            "Proyección Global con Usuarios Activos": [
+                f"{factor_10 * 5:,.1f} hectáreas",
+                f"{factor_10 * 10:,.1f} tCO₂ / año",
+                f"{factor_10 * 0.4:,.2f} toneladas / mes"
+            ]
+        }
+        st.table(pd.DataFrame(data_ambiental))
+
+# PESTAÑA 3: TAM / SAM / SOM
+with tab3:
+    st.subheader("🌍 Dimensionamiento del Mercado (TAM / SAM / SOM)")
+    
+    col_mkt1, col_mkt2 = st.columns([2, 3])
+    
+    with col_mkt1:
+        data_tam = {
+            "Nivel de Mercado": ["TAM", "SAM", "SOM"],
+            "Monto Total ($ USD)": ["$1,225,000,000 USD", "$191,000,000 USD", "$312,500 USD"],
+            "Definición": [
+                "Total Addressable Market (Silver Economy Global/Regional)",
+                "Serviceable Available Market (Mercado Accesible Target)",
+                "Serviceable Obtainable Market (Captura Objetivo Inicial)"
+            ]
+        }
+        st.table(pd.DataFrame(data_tam))
+        
+    with col_mkt2:
+        st.markdown("### 📚 Fuentes y Referencias de Mercado")
+        st.info("""
+        * **TAM ($1.225B USD):** Comisión Europea – *Silver Economy Report*; FMI – *The Rise of the Silver Economy*.
+        * **SAM ($191M USD):** DANE (Proyecciones poblacionales Colombia), Ministerio de Comercio, Ministerio de Salud y Estudios del Ecosistema de Economía Plateada.
+        * **SOM ($312.5k USD):** Proyección operativa inicial de captura de mercado B2B/B2C en focos urbanos y rurales clave.
+        """)
+
+# PESTAÑA 4: BURN RATE & CASHFLOW
+with tab4:
     st.subheader("Estructura de Consumo de Caja (Burn Rate en USD)")
     col_burn_act, col_burn_proj = st.columns(2)
     
@@ -159,16 +220,15 @@ with tab2:
         data_actual = {
             "Concepto": ["Hosting", "Dominio", "Desayunos (Mensual)", "Desayunos Anualizados", "Costos Variables", "Total / Mes"],
             "Valor": [
-                f"${90000.00 / TRM:,.2f} USD / Año",  # ~$22.50
-                f"${70000.00 / TRM:,.2f} USD / Año",  # ~$17.50
-                f"${30000.00 / TRM:,.2f} USD",        # ~$7.50
-                f"${360000.00 / TRM:,.2f} USD",       # ~$90.00
-                f"${150000.00 / TRM:,.2f} USD",       # ~$37.50
-                f"${193333.33 / TRM:,.2f} USD"        # ~$48.33
+                f"${90000.00 / TRM:,.2f} USD / Año",
+                f"${70000.00 / TRM:,.2f} USD / Año",
+                f"${30000.00 / TRM:,.2f} USD",
+                f"${360000.00 / TRM:,.2f} USD",
+                f"${150000.00 / TRM:,.2f} USD",
+                f"${193333.33 / TRM:,.2f} USD"
             ]
         }
         st.table(pd.DataFrame(data_actual))
-        st.info(f"**Cashflow Operativo:** ${11006666.67 / TRM:,.2f} USD mensual")
 
     with col_burn_proj:
         st.markdown("### 🚀 Gross Burn Rate Proyectado (USD)")
@@ -178,56 +238,20 @@ with tab2:
                 "Costos Variables Proyectados", "Salario Felipe", "Salario Yoiner", "Salario Jose Berna", "Total Proyectado / Mes"
             ],
             "Valor": [
-                f"${7500.00 / TRM:,.2f} USD",        # ~$1.88
-                f"${5833.33 / TRM:,.2f} USD",        # ~$1.46
-                f"${30000.00 / TRM:,.2f} USD",       # ~$7.50
-                f"${150000.00 / TRM:,.2f} USD",      # ~$37.50
-                f"${6000000.00 / TRM:,.2f} USD",    # $1,500.00
-                f"${2000000.00 / TRM:,.2f} USD",    # $500.00
-                f"${4000000.00 / TRM:,.2f} USD",    # $1,000.00
-                f"${12193333.33 / TRM:,.2f} USD"    # ~$3,048.33
+                f"${7500.00 / TRM:,.2f} USD",
+                f"${5833.33 / TRM:,.2f} USD",
+                f"${30000.00 / TRM:,.2f} USD",
+                f"${150000.00 / TRM:,.2f} USD",
+                f"${6000000.00 / TRM:,.2f} USD",
+                f"${2000000.00 / TRM:,.2f} USD",
+                f"${4000000.00 / TRM:,.2f} USD",
+                f"${12193333.33 / TRM:,.2f} USD"
             ]
         }
         st.table(pd.DataFrame(data_proyectado))
 
-# PESTAÑA 3: INGRESOS OPERATIVOS
-with tab3:
-    st.subheader("Ingresos Operativos & Convenios (USD)")
-    
-    # Conversión de montos de ingresos de COP a USD
-    montos_cop = [
-        6000000, 70000000, 700000, 1500000, 3000000, 
-        4000000, 81200000, 11200000, 4081200000
-    ]
-    montos_usd = [m / TRM for m in montos_cop]
-    
-    data_ingresos = {
-        "Fuente de Ingreso": [
-            "Grupo Textil", "Calima", "Javeriana", "Icesi", "Comfandi", 
-            "Donación Internacional", "Total Sin Donación", "Total Sin Calima", "Total General Consolidado"
-        ],
-        "Monto ($ USD)": montos_usd,
-        "Tipo": [
-            "Operativo", "Convenio", "Educativo", "Educativo", "Alianza", 
-            "Filantropía", "Filtro Clave", "Filtro Clave", "Acumulado Consolidado"
-        ]
-    }
-    df_ingresos = pd.DataFrame(data_ingresos)
-    
-    col_t1, col_t2 = st.columns([2, 3])
-    with col_t1:
-        st.markdown("#### Detalle Financiero de Canales")
-        # Formatear la tabla de salida para que muestre decimales limpios
-        df_display = df_ingresos.copy()
-        df_display["Monto ($ USD)"] = df_display["Monto ($ USD)"].map(lambda x: f"${x:,.2f}")
-        st.table(df_display)
-    with col_t2:
-        st.markdown("#### Participación por Fuente de Ingresos (USD)")
-        df_chart = df_ingresos[~df_ingresos["Fuente de Ingreso"].str.contains("Total")]
-        st.bar_chart(data=df_chart, x="Fuente de Ingreso", y="Monto ($ USD)")
-
-# PESTAÑA 4: RENDIMIENTO DETALLADO IA
-with tab4:
+# PESTAÑA 5: RENDIMIENTO DETALLADO IA
+with tab5:
     st.subheader("Rendimiento y Sostenibilidad Tecnológica de la IA")
     col_ia_d1, col_ia_d2, col_ia_d3 = st.columns(3)
     
@@ -235,22 +259,22 @@ with tab4:
         st.markdown("#### ⚡ Latencia y Retención")
         st.metric("Latencia Promedio", f"{latency} seg", delta="-0.3 seg" if latency < 2.0 else "+0.4 seg")
         st.progress(max(0, min(100, int((5.0 - latency) / 4.5 * 100))))
-        st.caption("Meta: Menor a 2.0 segundos. Los adultos mayores presentan altas tasas de rebote ante latencias elevadas.")
+        st.caption("Meta: Menor a 2.0 segundos para evitar tasas de rebote en Senior Users.")
 
     with col_ia_d2:
-        st.markdown("#### 🎯 Tasa de Completado de Tareas (Task Completion Rate)")
+        st.markdown("#### 🎯 Resolución Autónoma")
         task_completion = min(100.0, accuracy * 1.05)
-        st.metric("Resolución Autónoma", f"{task_completion:.1f}%")
-        st.caption("Porcentaje de consultas de interacción social y orientación resueltas de manera autónoma por la IA.")
+        st.metric("Task Completion Rate", f"{task_completion:.1f}%")
+        st.caption("Consultas sociales e interacciones resueltas de forma autónoma por Sylver.")
 
     with col_ia_d3:
-        st.markdown("#### 💸 Métricas de Costo y Consumo")
+        st.markdown("#### 💸 Consumo de Inferencia")
         st.metric("Costo Promedio / Sesión", f"${cost_per_inference * 5:.3f} USD")
-        st.metric("Costo Mensual Consolidado (USD)", f"${costo_ia_mensual_usd:,.2f} USD")
-        st.caption("Cálculo directo basado en USD reales de infraestructura.")
+        st.metric("Costo Mensual Consolidado", f"${costo_ia_mensual_usd:,.2f} USD")
+        st.caption("Infraestructura escalable optimizada para atender a jóvenes con costo incremental cero.")
 
-# PESTAÑA 5: CRECIMIENTO SEMANAL Y PIVOT ASSESSMENT
-with tab5:
+# PESTAÑA 6: CRECIMIENTO SEMANAL Y PIVOT ASSESSMENT
+with tab6:
     st.subheader("Análisis de Crecimiento y Estrategia de Sostenibilidad")
     on_track = growth_rate >= 10.0
     st.write(f"**Tasa de Crecimiento Semanal de la Plataforma:** `{growth_rate}%`")
@@ -260,7 +284,6 @@ with tab5:
     else:
         st.error("⚠️ Alerta: No estamos alcanzando la meta del 10% de crecimiento semanal. Se requiere análisis estratégico.")
         
-    # Gráfico de Proyecciones
     semanas = [f"Semana {i}" for i in range(1, 7)]
     proyeccion_actual = [usuarios_activos]
     proyeccion_objetivo = [usuarios_activos]
@@ -281,15 +304,14 @@ with tab5:
     
     if not on_track:
         st.markdown(f"""
-        ### **Evaluación de Cambio de Rumbo (Pivot)**
-        Dado que el crecimiento semanal actual (**{growth_rate}%**) es menor al objetivo del **10%**, se propone un cambio táctico:
+        ### **Evaluación de Cambio de Rumbo (Pivot B2B2C)**
+        Dado que el crecimiento semanal actual (**{growth_rate}%**) está por debajo del objetivo del **10%**:
         
-        * **El Cuello de Botella:** La combinación del **Churn de jóvenes (1.17% mensual / 117% anual)** y la **latencia de la IA** limita la retención. Cada vez que perdemos un usuario Senior, perdemos el subsidio para {ratio_subsidio_cruzado:.2f} jóvenes.
-        * **Cambio Estructural Recomendado (Pivot B2B2C):** Transicionar de un modelo B2C individual a un canal **B2B2C** aliando la plataforma con empresas y cajas de compensación (ej. Comfandi, Calima). 
-        * **Modelo de Impacto:** Las empresas apadrinan lotes de licencias de bienestar para sus jubilados y familiares jóvenes de forma anual. Esto reduce el CAC individual a $0, elimina el Churn recurrente bajándolo a un **15% anual** y proyecta elevar la tasa de crecimiento semanal al **12.5%** de inmediato.
+        * **Estrategia B2B SaaS:** Impulsar la venta corporativa de licencias de **$100 USD** para que las empresas cumplan metas de impacto social/ESG y obtengan certificados auditables automáticos creados por la IA.
+        * **Escalamiento de Impacto:** Conectar la captación masiva mediante acuerdos corporativos para reducir el CAC de **$1,000 USD** y mantener el acceso gratuito de jóvenes apadrinados mediante la IA.
         """)
     else:
         st.markdown("""
         ### **Evaluación de Persistencia**
-        El crecimiento se encuentra por encima del objetivo. Se aconseja **persistir** en el modelo actual. Las acciones sugeridas son optimizar los tiempos de respuesta del LLM (Latencia) y consolidar el ratio de subsidio cruzado (RSC).
+        El ritmo de crecimiento actual sostiene la operación. Se recomienda profundizar la tracción del canal B2B SaaS corporativo de $100 USD y mantener la optimización de latencia en la IA.
         """)
