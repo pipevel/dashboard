@@ -21,7 +21,7 @@ TRM = 4000.0
 st.sidebar.header("🎛️ Simulador de Negocio")
 usuarios_activos = st.sidebar.number_input("Usuarios Activos (Seniors)", value=684, step=10)
 
-# Licencias y Suscripciones (Nuevas variables)
+# Licencias y Suscripciones
 precio_b2b_empresa = st.sidebar.number_input("Licencia B2B SaaS Empresas (USD)", value=100, step=10)
 mensualidad_senior = st.sidebar.slider("Suscripción Mensual Senior (USD)", min_value=10, max_value=500, value=50, step=5)
 suscripcion_jovenes = 0.0  # Entran GRATIS gracias a la IA automatizada
@@ -44,16 +44,15 @@ growth_rate = st.sidebar.slider("Tasa de Crecimiento Semanal Real (%)", min_valu
 # CÁLCULOS DINÁMICOS
 # ==========================================
 margen_senior = mensualidad_senior - costo_senior
-costo_joven = 0.0  # Costo cubierto automáticamente por IA
 ratio_subsidio_cruzado = 3.5  # Promedio: 1 senior apadrina entre 3 y 4 jóvenes
 total_jovenes_impactados = int(usuarios_activos * ratio_subsidio_cruzado)
 
 total_consultas_mes = usuarios_activos * 120  # Promedio de 120 interacciones mensuales por usuario
-costo_ia_mensual_usd = total_consultas_mes * cost_per_inference
+costo_ia_mensual_usd = int(round(total_consultas_mes * cost_per_inference))
 
 # Cálculo de ratios de valor de vida del cliente (LTV / CAC)
-ltv_senior = cac_senior * 3.0  # Ratio 3:1
-ltv_empresa = 400.0  # Ratio 4:1 con respecto a la licencia B2B de $100
+ltv_senior = int(round(cac_senior * 3.0))  # Ratio 3:1
+ltv_empresa = 400  # Ratio 4:1 con respecto a la licencia B2B de $100
 
 # ==========================================
 # KPIs PRINCIPALES (Métricas Estrella)
@@ -64,11 +63,11 @@ with col1:
 with col2:
     st.metric("Jóvenes Apadrinados", f"{total_jovenes_impactados:,}")
 with col3:
-    st.metric("Suscripción Senior", f"${mensualidad_senior:,.2f} USD")
+    st.metric("Suscripción Senior", f"${mensualidad_senior:,.0f} USD")
 with col4:
     st.metric("Precisión Agente IA", f"{accuracy}%")
 with col5:
-    st.metric("Inferencia IA / Mes", f"${costo_ia_mensual_usd:,.2f} USD")
+    st.metric("Inferencia IA / Mes", f"${costo_ia_mensual_usd:,.0f} USD")
 
 st.markdown("---")
 
@@ -102,15 +101,15 @@ with tab1:
             "Subsidio Cruzado Intergeneracional"
         ],
         "Valor Configurado": [
-            f"${precio_b2b_empresa:,.2f} USD",
-            f"${mensualidad_senior:,.2f} USD",
+            f"${precio_b2b_empresa:,.0f} USD",
+            f"${mensualidad_senior:,.0f} USD",
             "GRATIS (Automatizado con IA)",
-            f"${cac_senior:,.2f} USD",
+            f"${cac_senior:,.0f} USD",
             "3:1",
             "4:1",
-            f"${ltv_senior:,.2f} USD",
-            f"${margen_senior:,.2f} USD",
-            f"${costo_senior:,.2f} USD",
+            f"${ltv_senior:,.0f} USD",
+            f"${margen_senior:,.0f} USD",
+            f"${costo_senior:,.0f} USD",
             "1 Senior financia a 3–4 Jóvenes"
         ],
         "Detalle & Enfoque Estratégico": [
@@ -162,7 +161,6 @@ with tab2:
     with col_imp2:
         st.markdown("### 🌱 Impacto Ambiental y Sostenibilidad")
         
-        # Cálculos proporcionales considerando 10 residentes como base de referencia
         factor_10 = usuarios_activos / 10.0
         
         data_ambiental = {
@@ -177,9 +175,9 @@ with tab2:
                 "0.4 toneladas / mes"
             ],
             "Proyección Global con Usuarios Activos": [
-                f"{factor_10 * 5:,.1f} hectáreas",
-                f"{factor_10 * 10:,.1f} tCO₂ / año",
-                f"{factor_10 * 0.4:,.2f} toneladas / mes"
+                f"{int(round(factor_10 * 5)):,} hectáreas",
+                f"{int(round(factor_10 * 10)):,} tCO₂ / año",
+                f"{factor_10 * 0.4:,.1f} toneladas / mes"
             ]
         }
         st.table(pd.DataFrame(data_ambiental))
@@ -205,9 +203,9 @@ with tab3:
     with col_mkt2:
         st.markdown("### 📚 Fuentes y Referencias de Mercado")
         st.info("""
-        * **TAM ($1.225B USD):** Comisión Europea – *Silver Economy Report*; FMI – *The Rise of the Silver Economy*.
+        * **TAM ($1,225M USD / $1.225B USD):** Comisión Europea – *Silver Economy Report*; FMI – *The Rise of the Silver Economy*.
         * **SAM ($191M USD):** DANE (Proyecciones poblacionales Colombia), Ministerio de Comercio, Ministerio de Salud y Estudios del Ecosistema de Economía Plateada.
-        * **SOM ($312.5k USD):** Proyección operativa inicial de captura de mercado B2B/B2C en focos urbanos y rurales clave.
+        * **SOM ($312,500 USD):** Proyección operativa inicial de captura de mercado B2B/B2C en focos urbanos y rurales clave.
         """)
 
 # PESTAÑA 4: BURN RATE & CASHFLOW
@@ -220,12 +218,12 @@ with tab4:
         data_actual = {
             "Concepto": ["Hosting", "Dominio", "Desayunos (Mensual)", "Desayunos Anualizados", "Costos Variables", "Total / Mes"],
             "Valor": [
-                f"${90000.00 / TRM:,.2f} USD / Año",
-                f"${70000.00 / TRM:,.2f} USD / Año",
-                f"${30000.00 / TRM:,.2f} USD",
-                f"${360000.00 / TRM:,.2f} USD",
-                f"${150000.00 / TRM:,.2f} USD",
-                f"${193333.33 / TRM:,.2f} USD"
+                f"${int(round(90000.00 / TRM)):,} USD / Año",
+                f"${int(round(70000.00 / TRM)):,} USD / Año",
+                f"${int(round(30000.00 / TRM)):,} USD",
+                f"${int(round(360000.00 / TRM)):,} USD",
+                f"${int(round(150000.00 / TRM)):,} USD",
+                f"${int(round(193333.33 / TRM)):,} USD"
             ]
         }
         st.table(pd.DataFrame(data_actual))
@@ -238,14 +236,14 @@ with tab4:
                 "Costos Variables Proyectados", "Salario Felipe", "Salario Yoiner", "Salario Jose Berna", "Total Proyectado / Mes"
             ],
             "Valor": [
-                f"${7500.00 / TRM:,.2f} USD",
-                f"${5833.33 / TRM:,.2f} USD",
-                f"${30000.00 / TRM:,.2f} USD",
-                f"${150000.00 / TRM:,.2f} USD",
-                f"${6000000.00 / TRM:,.2f} USD",
-                f"${2000000.00 / TRM:,.2f} USD",
-                f"${4000000.00 / TRM:,.2f} USD",
-                f"${12193333.33 / TRM:,.2f} USD"
+                f"${int(round(7500.00 / TRM)):,} USD",
+                f"${int(round(5833.33 / TRM)):,} USD",
+                f"${int(round(30000.00 / TRM)):,} USD",
+                f"${int(round(150000.00 / TRM)):,} USD",
+                f"${int(round(6000000.00 / TRM)):,} USD",
+                f"${int(round(2000000.00 / TRM)):,} USD",
+                f"${int(round(4000000.00 / TRM)):,} USD",
+                f"${int(round(12193333.33 / TRM)):,} USD"
             ]
         }
         st.table(pd.DataFrame(data_proyectado))
@@ -270,7 +268,7 @@ with tab5:
     with col_ia_d3:
         st.markdown("#### 💸 Consumo de Inferencia")
         st.metric("Costo Promedio / Sesión", f"${cost_per_inference * 5:.3f} USD")
-        st.metric("Costo Mensual Consolidado", f"${costo_ia_mensual_usd:,.2f} USD")
+        st.metric("Costo Mensual Consolidado", f"${costo_ia_mensual_usd:,.0f} USD")
         st.caption("Infraestructura escalable optimizada para atender a jóvenes con costo incremental cero.")
 
 # PESTAÑA 6: CRECIMIENTO SEMANAL Y PIVOT ASSESSMENT
